@@ -3,6 +3,8 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 require("dotenv").config();
 
+const errorHandler = require("./middleware/errorHandler");
+
 const userRoutes = require("./routes/users");
 const catalogRoutes = require("./routes/catalog");
 const aiRoutes = require("./routes/ai");
@@ -24,6 +26,8 @@ mongoose.connect("mongodb://127.0.0.1:27017/hobbyfinder")
 app.use("/api/users", userRoutes);
 app.use("/api/catalog", catalogRoutes);
 app.use("/api/ai", aiRoutes);
+
+app.use(errorHandler);
 
 app.listen(5000, () => {
   console.log("Backend running on port 5000");
