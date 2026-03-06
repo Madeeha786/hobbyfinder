@@ -1,0 +1,14 @@
+{
+  "name": "hobbyfinder-backend",
+  "version": "1.0.0",
+  "main": "server.js",
+  "dependencies": {
+    "axios": "^1.13.6",
+    "cors": "^2.8.6",
+    "dotenv": "^16.6.1",
+    "express": "^4.22.1",
+    "mongoose": "^8.23.0",
+    "mysql2": "^3.18.2",
+    "pg": "^8.11.3"
+  }
+}
