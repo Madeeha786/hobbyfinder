@@ -19,3 +19,4 @@ CREATE TABLE recommendations (
   catalog_id INTEGER REFERENCES catalog(id),
   recommended_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
