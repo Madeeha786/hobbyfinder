@@ -5,12 +5,33 @@ CREATE TABLE catalog (
   genre VARCHAR(50)
 );
 
+INSERT INTO catalog (title, type, genre) VALUES
+('Dune', 'book', 'sci-fi'),
+('Interstellar', 'movie', 'sci-fi'),
+('Hyperion', 'book', 'sci-fi'),
+('The Expanse', 'book', 'sci-fi'),
+('Blade Runner 2049', 'movie', 'sci-fi'),
+('Synthwave 80s Mix', 'music', 'electronic'),
+('Star Wars', 'movie', 'adventure'),
+('Foundation', 'book', 'sci-fi'),
+('Arrival', 'movie', 'sci-fi'),
+('Mass Effect OST', 'music', 'soundtrack');
+
 CREATE TABLE hobbies (
   id SERIAL PRIMARY KEY,
   name VARCHAR(100),
   category VARCHAR(50),
   difficulty VARCHAR(50)
 );
+
+INSERT INTO hobbies (name, category, difficulty) VALUES
+('Astronomy', 'science', 'beginner'),
+('Creative Writing', 'creative', 'beginner'),
+('Film Making', 'creative', 'intermediate'),
+('Playing Guitar', 'music', 'beginner'),
+('Astrophotography', 'science', 'intermediate'),
+('Sci-Fi Worldbuilding', 'creative', 'intermediate'),
+('Music Production', 'music', 'advanced');
 
 CREATE TABLE recommendations (
   id SERIAL PRIMARY KEY,
@@ -19,4 +40,11 @@ CREATE TABLE recommendations (
   catalog_id INTEGER REFERENCES catalog(id),
   recommended_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+INSERT INTO recommendations (user_id, hobby_id, catalog_id)
+VALUES
+('demo_user_1', 1, 2),
+('demo_user_1', 2, 1),
+('demo_user_1', 6, 3),
+('demo_user_1', 3, 2);
 
