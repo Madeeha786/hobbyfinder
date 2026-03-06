@@ -1,0 +1,21 @@
+CREATE TABLE catalog (
+  id SERIAL PRIMARY KEY,
+  title VARCHAR(100),
+  type VARCHAR(50),
+  genre VARCHAR(50)
+);
+
+CREATE TABLE hobbies (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(100),
+  category VARCHAR(50),
+  difficulty VARCHAR(50)
+);
+
+CREATE TABLE recommendations (
+  id SERIAL PRIMARY KEY,
+  user_id VARCHAR(50),
+  hobby_id INTEGER REFERENCES hobbies(id),
+  catalog_id INTEGER REFERENCES catalog(id),
+  recommended_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
