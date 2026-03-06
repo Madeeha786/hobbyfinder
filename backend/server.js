@@ -32,3 +32,9 @@ app.use(errorHandler);
 app.listen(5000, () => {
   console.log("Backend running on port 5000");
 });
+
+
+// To host it locally, run
+// node server.js
+// and the website will be hosted on
+// http://localhost:5000
