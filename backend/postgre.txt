@@ -1,3 +1,9 @@
+How to access postgresql:
+In windows, navigate to "C:\Program Files\PostgreSQL\18\bin" (and in linux no worries - already in path)
+then type:
+psql -U postgres -d hobbyfinder
+
+
 CREATE TABLE catalog (
   id SERIAL PRIMARY KEY,
   title VARCHAR(100),
@@ -17,6 +23,8 @@ INSERT INTO catalog (title, type, genre) VALUES
 ('Arrival', 'movie', 'sci-fi'),
 ('Mass Effect OST', 'music', 'soundtrack');
 
+
+
 CREATE TABLE hobbies (
   id SERIAL PRIMARY KEY,
   name VARCHAR(100),
@@ -32,6 +40,8 @@ INSERT INTO hobbies (name, category, difficulty) VALUES
 ('Astrophotography', 'science', 'intermediate'),
 ('Sci-Fi Worldbuilding', 'creative', 'intermediate'),
 ('Music Production', 'music', 'advanced');
+
+
 
 CREATE TABLE recommendations (
   id SERIAL PRIMARY KEY,
