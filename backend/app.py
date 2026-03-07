@@ -1,93 +1,83 @@
 from flask import Flask, request, jsonify
 import psycopg2
+from sentence_transformers import SentenceTransformer
+from sklearn.metrics.pairwise import cosine_similarity
 
 app = Flask(__name__)
 
-# PostgreSQL connection
+model = SentenceTransformer('all-MiniLM-L6-v2')
+
 conn = psycopg2.connect(
     host="localhost",
     database="hobbyfinder",
     user="postgres",
-    password="hobbyfinder",
-    port=5432
+    password="hobbyfinder"
 )
 
 cursor = conn.cursor()
 
 
-def get_recommendations(media_type, genres):
-    """
-    Query PostgreSQL catalog for matching type and genre
-    """
-    
-    results = []
+def get_catalog():
 
-    for genre in genres:
+    cursor.execute("""
+        SELECT title, type, description
+        FROM catalog
+    """)
 
-        cursor.execute(
-            """
-            SELECT catalog.title, catalog.type, genres.name
-            FROM catalog
-            JOIN genres ON catalog.genre_id = genres.id
-            WHERE catalog.type = %s AND genres.name = %s
-            LIMIT 3
-            """,
-            (media_type, genre)
-        )
+    rows = cursor.fetchall()
 
-        '''
-        cursor.execute(
-            """
-            SELECT title, type, genre_id
-            FROM catalog
-            WHERE type = %s AND genre_id = %s
-            LIMIT 3
-            """,
-            (media_type, genre)
-        )
-        '''
-        
-        rows = cursor.fetchall()
+    catalog = []
 
-        for r in rows:
-            results.append({
-                "title": r[0],
-                "type": r[1],
-                "genre": r[2]
-            })
+    for r in rows:
+        catalog.append({
+            "title": r[0],
+            "type": r[1],
+            "description": r[2]
+        })
 
-    return results
+    return catalog
 
-@app.route("/")
-def home():
-    return "HobbyFinder AI service is running!"
 
 @app.route("/recommend", methods=["POST"])
 def recommend():
 
     data = request.json
 
-    recommendations = []
+    interests = []
 
-    # Books
-    if "books" in data:
-        recs = get_recommendations("book", data["books"])
-        recommendations.extend(recs)
+    for key in data:
+        interests.extend(data[key])
 
-    # Movies
-    if "movies" in data:
-        recs = get_recommendations("movie", data["movies"])
-        recommendations.extend(recs)
+    user_text = " ".join(interests)
 
-    # Songs
-    if "songs" in data:
-        recs = get_recommendations("music", data["songs"])
-        recommendations.extend(recs)
+    catalog = get_catalog()
+
+    catalog_descriptions = [c["description"] for c in catalog]
+
+    user_embedding = model.encode([user_text])
+    catalog_embeddings = model.encode(catalog_descriptions)
+
+    similarities = cosine_similarity(user_embedding, catalog_embeddings)[0]
+
+    ranked = sorted(
+        zip(catalog, similarities),
+        key=lambda x: x[1],
+        reverse=True
+    )
+
+    results = []
+
+    for item, score in ranked[:5]:
+        results.append({
+            "title": item["title"],
+            "type": item["type"],
+            "score": float(score)
+        })
 
     return jsonify({
-        "recommendations": recommendations
+        "recommendations": results
     })
 
 
 if __name__ == "__main__":
-    app.run(port=8000, debug=True)
+    app.run(port=8000)
