@@ -4,57 +4,48 @@ then type:
 psql -U postgres -d hobbyfinder
 
 
-CREATE TABLE catalog (
-  id SERIAL PRIMARY KEY,
-  title VARCHAR(100),
-  type VARCHAR(50),
-  genre VARCHAR(50)
+CREATE TABLE genres (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(50) UNIQUE NOT NULL
 );
 
-INSERT INTO catalog (title, type, genre) VALUES
-('Dune', 'book', 'sci-fi'),
-('Interstellar', 'movie', 'sci-fi'),
-('Hyperion', 'book', 'sci-fi'),
-('The Expanse', 'book', 'sci-fi'),
-('Blade Runner 2049', 'movie', 'sci-fi'),
-('Synthwave 80s Mix', 'music', 'electronic'),
-('Star Wars', 'movie', 'adventure'),
-('Foundation', 'book', 'sci-fi'),
-('Arrival', 'movie', 'sci-fi'),
-('Mass Effect OST', 'music', 'soundtrack');
-
-
+INSERT INTO genres (name) VALUES
+('sci-fi'),
+('fantasy'),
+('mystery'),
+('ambient'),
+('adventure');
 
 CREATE TABLE hobbies (
-  id SERIAL PRIMARY KEY,
-  name VARCHAR(100),
-  category VARCHAR(50),
-  difficulty VARCHAR(50)
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(50) UNIQUE NOT NULL
 );
 
-INSERT INTO hobbies (name, category, difficulty) VALUES
-('Astronomy', 'science', 'beginner'),
-('Creative Writing', 'creative', 'beginner'),
-('Film Making', 'creative', 'intermediate'),
-('Playing Guitar', 'music', 'beginner'),
-('Astrophotography', 'science', 'intermediate'),
-('Sci-Fi Worldbuilding', 'creative', 'intermediate'),
-('Music Production', 'music', 'advanced');
+INSERT INTO hobbies (name) VALUES
+('Reading'),
+('Streaming'),
+('Listening to Music');
 
+CREATE TABLE catalog (
+    id SERIAL PRIMARY KEY,
+    title VARCHAR(150) NOT NULL,
+    type VARCHAR(50) NOT NULL,
+    genre_id INTEGER REFERENCES genres(id)
+);
 
+INSERT INTO catalog (title, type, genre_id) VALUES
+('Interstellar', 'movie', 1),
+('Blade Runner', 'movie', 1),
+('Dune', 'book', 1),
+('The Hobbit', 'book', 2),
+('Sherlock Holmes', 'book', 3),
+('Lo-Fi Beats', 'music', 4),
+('Star Wars', 'movie', 5);
 
 CREATE TABLE recommendations (
-  id SERIAL PRIMARY KEY,
-  user_id VARCHAR(50),
-  hobby_id INTEGER REFERENCES hobbies(id),
-  catalog_id INTEGER REFERENCES catalog(id),
-  recommended_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    id SERIAL PRIMARY KEY,
+    user_id VARCHAR(100) NOT NULL,
+    catalog_id INTEGER REFERENCES catalog(id),
+    hobby_id INTEGER REFERENCES hobbies(id),
+    recommended_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-
-INSERT INTO recommendations (user_id, hobby_id, catalog_id)
-VALUES
-('demo_user_1', 1, 2),
-('demo_user_1', 2, 1),
-('demo_user_1', 6, 3),
-('demo_user_1', 3, 2);
-
