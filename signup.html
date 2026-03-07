@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>HobbyFinder - Sign Up</title>
+
+<style>
+
+body{
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg,#9CAF88,#7A8F73);
+    height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    margin:0;
+}
+
+.container{
+    background:#F4F7F2;
+    padding:40px;
+    border-radius:12px;
+    width:330px;
+    box-shadow:0 12px 30px rgba(0,0,0,0.15);
+    text-align:center;
+}
+
+h1{
+    margin-bottom:8px;
+    color:#4F6F52;
+    letter-spacing:1px;
+}
+
+.subtitle{
+    color:#6B7F6B;
+    font-size:14px;
+    margin-bottom:25px;
+}
+
+input{
+    width:100%;
+    padding:11px;
+    margin:10px 0;
+    border:1px solid #C7D3C3;
+    border-radius:6px;
+    font-size:14px;
+    background:#FFFFFF;
+}
+
+input:focus{
+    outline:none;
+    border-color:#7A8F73;
+}
+
+button{
+    width:100%;
+    padding:12px;
+    margin-top:10px;
+    border:none;
+    border-radius:6px;
+    background:#7A8F73;
+    color:white;
+    font-size:16px;
+    cursor:pointer;
+    transition:0.2s;
+}
+
+button:hover{
+    background:#657B5F;
+}
+
+.footer{
+    margin-top:20px;
+    font-size:13px;
+    color:#6B7F6B;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>HobbyFinder</h1>
+<p class="subtitle">Discover hobbies you'll love</p>
+
+<form id="signupForm">
+
+<input 
+type="text"
+placeholder="Username"
+id="username"
+required
+>
+
+<input 
+type="password"
+placeholder="Password"
+id="password"
+required
+>
+
+<button type="submit">Sign Up</button>
+
+</form>
+
+<div class="footer">
+Already have an account? Log in
+</div>
+
+</div>
+
+<script>
+
+document.getElementById("signupForm").addEventListener("submit", async function(e){
+
+e.preventDefault();
+
+const username = document.getElementById("username").value;
+const password = document.getElementById("password").value;
+
+const response = await fetch("http://localhost:5000/api/users/register",{
+method:"POST",
+headers:{
+"Content-Type":"application/json"
+},
+body: JSON.stringify({
+username: username,
+password: password
+})
+});
+
+const data = await response.json();
+
+console.log(data);
+
+alert("User registered successfully!");
+
+});
+
+</script>
+
+</body>
+</html>
