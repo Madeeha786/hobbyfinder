@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<title>HobbyFinder Dashboard</title>
+<link rel="stylesheet" href="styles.css">
+
+<style>
+
+.recommend-grid{
+display:grid;
+grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
+gap:20px;
+margin-top:20px;
+}
+
+.recommend-card{
+background:white;
+padding:20px;
+border-radius:12px;
+box-shadow:0px 4px 12px rgba(0,0,0,0.08);
+transition:0.2s;
+}
+
+.recommend-card:hover{
+transform:translateY(-4px);
+}
+
+.recommend-card h3{
+margin:0;
+}
+
+.recommend-card p{
+color:#666;
+margin-top:8px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="header">
+🌿 Your Recommendations
+</div>
+
+<div class="container">
+
+<h2>Recommended for you</h2>
+
+<div id="results" class="recommend-grid"></div>
+
+<br>
+
+<button onclick="openChat()">Open AI Assistant</button>
+
+</div>
+
+<script>
+
+const user_id = localStorage.getItem("user_id");
+
+if(!user_id){
+alert("User not logged in.");
+window.location.href = "signup.html";
+}
+
+async function loadRecommendations(){
+
+try{
+
+const res = await fetch("http://localhost:5000/api/ai/recommend",{
+method:"POST",
+headers:{
+"Content-Type":"application/json"
+},
+body: JSON.stringify({
+interests: JSON.parse(localStorage.getItem("interests"))
+})
+});
+
+const data = await res.json();
+
+const container = document.getElementById("results");
+
+container.innerHTML = "";
+
+data.recommendations.forEach(item => {
+
+const card = document.createElement("div");
+card.className = "recommend-card";
+
+card.innerHTML =
+"<h3>" + item.title + "</h3>" +
+"<p>" + item.description + "</p>";
+
+container.appendChild(card);
+
+});
+
+}catch(err){
+
+console.error("Recommendation error:",err);
+
+}
+
+}
+
+function openChat(){
+window.location.href = "chatbot.html";
+}
+
+loadRecommendations();
+
+</script>
+
+</body>
+</html>

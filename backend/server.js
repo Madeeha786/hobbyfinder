@@ -8,6 +8,7 @@ const errorHandler = require("./middleware/errorHandler");
 const userRoutes = require("./routes/users");
 const catalogRoutes = require("./routes/catalog");
 const aiRoutes = require("./routes/ai");
+const interestRoutes = require("./routes/interests");
 
 const app = express();   // ✅ CREATE APP FIRST
 
@@ -26,6 +27,7 @@ mongoose.connect("mongodb://127.0.0.1:27017/hobbyfinder")
 app.use("/api/users", userRoutes);
 app.use("/api/catalog", catalogRoutes);
 app.use("/api/ai", aiRoutes);
+app.use("/api/interests", interestRoutes);
 
 app.use(errorHandler);
 

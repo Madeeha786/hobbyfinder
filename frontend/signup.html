@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>HobbyFinder</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+
+<div class="header">
+    🌿 HobbyFinder
+</div>
+
+<div class="container">
+
+    <div class="card">
+
+        <h2>Create your account</h2>
+        <p>Discover books, movies and music you'll love.</p>
+
+        <input id="username" placeholder="Username">
+
+        <input id="password" type="password" placeholder="Password">
+
+        <button onclick="signup()">Sign Up</button>
+
+    </div>
+
+</div>
+
+<script>
+
+async function signup(){
+
+const username = document.getElementById("username").value;
+const password = document.getElementById("password").value;
+
+const res = await fetch("http://localhost:5000/api/users/register",{
+method:"POST",
+headers:{
+"Content-Type":"application/json"
+},
+body: JSON.stringify({
+username: username,
+password: password
+})
+});
+
+const data = await res.json();
+
+console.log("Server response:", data);   // DEBUG LINE
+
+localStorage.setItem("user_id", data._id);
+
+console.log("Stored user_id:", localStorage.getItem("user_id"));  // DEBUG
+
+window.location.href = "interests.html";
+
+}
+
+</script>
+
+</body>
+</html>

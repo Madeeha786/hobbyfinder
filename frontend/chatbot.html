@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+
+<div class="header">HobbyFinder Assistant</div>
+
+<div class="container">
+
+<div class="card">
+
+<div id="chat"></div>
+
+<input id="message" placeholder="Ask for recommendations...">
+
+<button onclick="send()">Send</button>
+
+</div>
+
+</div>
+
+<script>
+
+async function send(){
+
+let msg=document.getElementById("message").value;
+
+let chat=document.getElementById("chat");
+
+chat.innerHTML+="<p><b>You:</b> "+msg+"</p>";
+
+const res = await fetch("http://127.0.0.1:8000/chat",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({
+user_id:localStorage.getItem("user_id"),
+message:msg
+})
+});
+
+const data=await res.json();
+
+chat.innerHTML+="<p><b>AI:</b> "+data.reply+"</p>";
+
+}
+
+</script>
+
+</body>
+</html>

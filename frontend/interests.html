@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<title>Select Interests</title>
+<link rel="stylesheet" href="styles.css">
+
+<style>
+
+.category-buttons{
+    text-align:center;
+    margin-bottom:20px;
+}
+
+.category-buttons button{
+    margin:5px;
+}
+
+.genre-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:10px;
+    margin-top:15px;
+}
+
+.genre-btn{
+    padding:10px;
+    border-radius:8px;
+    border:1px solid #ccc;
+    cursor:pointer;
+    background:white;
+    transition:0.2s;
+}
+
+.genre-btn:hover{
+    transform:scale(1.05);
+}
+
+.genre-btn.selected{
+    background:#7A8F73;
+    color:white;
+    border:none;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="header">
+🌿 Choose Your Interests
+</div>
+
+<div class="container">
+
+<div class="card">
+
+<h2>Select Categories</h2>
+
+<div class="category-buttons">
+
+<button onclick="showGenres('books')">📚 Books</button>
+<button onclick="showGenres('movies')">🎬 Movies</button>
+<button onclick="showGenres('songs')">🎧 Songs</button>
+
+</div>
+
+<div id="genres"></div>
+
+<br>
+
+<button onclick="save()">Continue</button>
+
+</div>
+
+</div>
+
+<script>
+
+const genres = {
+books:["Fantasy","Sci-Fi","Mystery"],
+movies:["Action","Adventure","Sci-Fi"],
+songs:["Lo-Fi","Ambient","Jazz"]
+};
+
+let selections = {
+books:[],
+movies:[],
+songs:[]
+};
+
+function showGenres(type){
+
+const container=document.getElementById("genres");
+
+container.innerHTML="<h3>Select "+type+" genres</h3>";
+
+let grid=document.createElement("div");
+grid.className="genre-grid";
+
+genres[type].forEach(g=>{
+
+let btn=document.createElement("div");
+btn.className="genre-btn";
+btn.innerText=g;
+
+if(selections[type].includes(g)){
+btn.classList.add("selected");
+}
+
+btn.onclick=function(){
+
+if(selections[type].includes(g)){
+
+selections[type]=selections[type].filter(x=>x!==g);
+btn.classList.remove("selected");
+
+}else{
+
+selections[type].push(g);
+btn.classList.add("selected");
+
+}
+
+};
+
+grid.appendChild(btn);
+
+});
+
+container.appendChild(grid);
+
+}
+
+async function save(){
+
+const user_id=localStorage.getItem("user_id");
+
+localStorage.setItem("interests", JSON.stringify(selections));
+
+await fetch("http://localhost:5000/api/interests",{
+method:"POST",
+headers:{
+"Content-Type":"application/json"
+},
+body:JSON.stringify({
+user_id:user_id,
+books:selections.books,
+movies:selections.movies,
+songs:selections.songs
+})
+});
+
+window.location.href="dashboard.html";
+
+}
+
+</script>
+
+</body>
+</html>
