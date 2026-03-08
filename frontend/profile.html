@@ -6,8 +6,11 @@
     <title>Profile | HobbyFinder</title>
     <link rel="stylesheet" href="styles.css">
     <style>
-        .tag { background: var(--sage-green); color: white; padding: 5px 12px; border-radius: 20px; font-size: 13px; margin-right: 5px; display: inline-block; margin-bottom: 5px;}
-        .profile-card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        .profile-card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 20px;}
+        .tag-group { margin-bottom: 20px; }
+        .tag-group h3 { font-size: 16px; color: var(--earth-brown); margin-bottom: 10px; }
+        .tag { background: var(--sage-green); color: white; padding: 5px 12px; border-radius: 20px; font-size: 13px; margin-right: 5px; display: inline-block; margin-bottom: 5px; font-weight: bold;}
+        .empty-text { color: var(--text-light); font-style: italic; font-size: 14px; }
     </style>
 </head>
 <body>
@@ -24,30 +27,85 @@
     <main class="main-content">
         <div class="page-header">
             <h1>My Profile</h1>
-            <p>Manage your MongoDB user data and preferences.</p>
+            <p>Manage your MongoDB user data and AI mapping preferences.</p>
+        </div>
+
+        <div class="profile-card" id="accountDetails">
+            <h2 style="color: var(--dark-sage); margin-top: 0;">Account Details</h2>
+            <p>Loading your info from MongoDB...</p>
         </div>
 
         <div class="profile-card">
-            <h2 style="color: var(--dark-sage); margin-top: 0;">Account Details</h2>
-            <p><strong>Username:</strong> Explorer123</p>
-            <p><strong>Email:</strong> explorer@hobbyfinder.com</p>
+            <h2 style="color: var(--dark-sage); margin-top: 0; margin-bottom: 5px;">My Current Interests</h2>
+            <p style="color: var(--text-light); font-size: 14px; margin-bottom: 20px;">The AI uses these tags to semantically map to genres in PostgreSQL.</p>
             
-            <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
-            
-            <h2 style="color: var(--dark-sage);">My Current Interests</h2>
-            <p style="color: var(--text-light); font-size: 14px;">The AI uses these tags to map to genres in PostgreSQL.</p>
-            
-            <div>
-                <span class="tag">Space Exploration</span>
-                <span class="tag">Cyberpunk</span>
-                <span class="tag">Mystery</span>
-                <span class="tag">Instrumental Music</span>
-                <span class="tag">Fantasy Worlds</span>
+            <div id="interestsContainer">
+                <p>Loading your preferences...</p>
             </div>
-
-            <button class="btn-primary" style="width: auto; margin-top: 25px;">Edit Interests</button>
+            
+            <button class="btn-primary" style="margin-top: 20px;" onclick="window.location.href='interests.html'">Update Interests</button>
         </div>
     </main>
 
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const userId = localStorage.getItem('user_id');
+            
+            if (!userId) {
+                window.location.href = 'signup.html';
+                return;
+            }
+
+            // 1. Fetch Basic User Info from MongoDB (via users.js)
+            try {
+                const userRes = await fetch(`http://localhost:5000/api/users/${userId}`);
+                if (userRes.ok) {
+                    const userData = await userRes.json();
+                    const joinDate = new Date(userData.created_at).toLocaleDateString();
+                    
+                    document.getElementById('accountDetails').innerHTML = `
+                        <h2 style="color: var(--dark-sage); margin-top: 0;">Account Details</h2>
+                        <p><strong>Username:</strong> ${userData.username}</p>
+                        <p><strong>Member Since:</strong> ${joinDate}</p>
+                        <p style="color: var(--text-light); font-size: 12px; margin-top: 15px;">User ID: ${userData._id}</p>
+                    `;
+                }
+            } catch (err) {
+                console.error("Failed to load user account info", err);
+            }
+
+            // 2. Fetch Interests from MongoDB (via interests.js)
+            try {
+                const interestRes = await fetch(`http://localhost:5000/api/interests/${userId}`);
+                const container = document.getElementById('interestsContainer');
+                
+                if (interestRes.ok) {
+                    const interests = await interestRes.json();
+                    container.innerHTML = ''; // Clear loading text
+                    
+                    // Helper to generate tag HTML
+                    const createTags = (title, arr) => {
+                        if (!arr || arr.length === 0) return `<div class="tag-group"><h3>${title}</h3><p class="empty-text">None selected</p></div>`;
+                        const tagsHtml = arr.map(item => `<span class="tag">${item}</span>`).join('');
+                        return `<div class="tag-group"><h3>${title}</h3>${tagsHtml}</div>`;
+                    };
+
+                    container.innerHTML += createTags('🎬 Movies', interests.movies);
+                    container.innerHTML += createTags('📚 Books', interests.books);
+                    container.innerHTML += createTags('🎵 Music', interests.songs);
+
+                } else {
+                    container.innerHTML = `<p class="empty-text">No interests found. Click below to set them up!</p>`;
+                }
+            } catch (err) {
+                console.error("Failed to load interests", err);
+            }
+        });
+
+        function logout() {
+            localStorage.clear();
+            window.location.href = 'signup.html';
+        }
+    </script>
 </body>
 </html>

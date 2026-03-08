@@ -38,47 +38,66 @@ def get_catalog():
 @app.route("/recommend", methods=["POST"])
 def recommend():
     data = request.json
-    interests = []
+    interests_data = data.get("interests", {})
     
-    # Grab user interests from the request body
-    if "interests" in data:
-        interests_data = data["interests"]
-        for key in interests_data:
-            interests.extend(interests_data[key])
-    else:
-        for key in data:
-            if isinstance(data[key], list):
-                interests.extend(data[key])
-
-    user_text = " ".join(interests)
+    # Fallback just in case the JSON structure differs
+    if not interests_data and "movies" in data:
+        interests_data = data
+        
     catalog = get_catalog()
-    catalog_descriptions = [c["description"] for c in catalog]
-
-    user_embedding = model.encode([user_text])
-    catalog_embeddings = model.encode(catalog_descriptions)
-
-    similarities = cosine_similarity(user_embedding, catalog_embeddings)[0]
-
-    ranked = sorted(
-        zip(catalog, similarities),
-        key=lambda x: x[1],
-        reverse=True
-    )
-
     results = []
-    for item, score in ranked[:8]:
-        results.append({
-            "title": item["title"],
-            "type": item["type"],
-            "score": float(score),
-            "description": item["description"]
-        })
+
+    # Map the JSON keys to the PostgreSQL 'type' column
+    category_map = {
+        "movies": "movie",
+        "books": "book",
+        "songs": "music"
+    }
+
+    # Run a dedicated AI search for EACH category the user selected
+    for category_key, db_type in category_map.items():
+        cat_interests = interests_data.get(category_key, [])
+        
+        # If the user didn't pick any genres for this category, skip it
+        if not cat_interests:
+            continue
+
+        # 1. Filter catalog down to only this specific type
+        cat_items = [c for c in catalog if c["type"] == db_type]
+        if not cat_items:
+            continue
+
+        # 2. Encode user's interests specifically for this type
+        user_text = " ".join(cat_interests)
+        user_embedding = model.encode([user_text])
+        
+        # 3. Encode catalog descriptions for this type
+        cat_descriptions = [c["description"] for c in cat_items]
+        cat_embeddings = model.encode(cat_descriptions)
+
+        # 4. Calculate similarities
+        similarities = cosine_similarity(user_embedding, cat_embeddings)[0]
+
+        ranked = sorted(
+            zip(cat_items, similarities),
+            key=lambda x: x[1],
+            reverse=True
+        )
+
+        # 5. Append the top 5 matches for THIS specific category
+        for item, score in ranked[:5]:
+            results.append({
+                "title": item["title"],
+                "type": item["type"],
+                "score": float(score),
+                "description": item["description"]
+            })
 
     return jsonify({
         "recommendations": results
     })
 
-
+# ---> THIS WAS THE MISSING FUNCTION <---
 def detect_type(message):
     message = message.lower()
     if "music" in message or "song" in message or "track" in message:
@@ -123,8 +142,6 @@ def chat():
 
     results = []
     for item, score in top_items:
-        # We optionally filter out terrible matches (e.g., score < 0.1)
-        # but for now, we'll just append the top 3.
         results.append({
             "title": item["title"],
             "type": item["type"],
