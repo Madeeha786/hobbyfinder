@@ -66,7 +66,7 @@ def recommend():
     )
 
     results = []
-    for item, score in ranked[:5]:
+    for item, score in ranked[:8]:
         results.append({
             "title": item["title"],
             "type": item["type"],

@@ -12,51 +12,26 @@ const pool = new Pool({
   port: 5432
 });
 
+// --- RECOMMENDATION ROUTE ---
 router.post("/recommend", async (req, res) => {
+    try {
+        const interests = req.body.interests;
+        // user_id is no longer needed here since we aren't saving to the DB automatically anymore
 
-try{
+        /* Call Flask AI */
+        const response = await axios.post("http://127.0.0.1:8000/recommend", interests);
+        const recommendations = response.data.recommendations;
 
-const interests = req.body.interests;
-const user_id = req.body.user_id;
+        // Note: The loop that automatically inserted into PostgreSQL has been removed!
 
-/* Call Flask AI */
+        res.json(recommendations);
 
-const response = await axios.post("http://127.0.0.1:8000/recommend", interests);
-
-const recommendations = response.data.recommendations;
-
-/* Store recommendations in PostgreSQL */
-
-for (const item of recommendations) {
-
-const catalog = await pool.query(
-"SELECT id FROM catalog WHERE title = $1",
-[item.title]
-);
-
-if(catalog.rows.length > 0){
-
-const catalog_id = catalog.rows[0].id;
-
-await pool.query(
-"INSERT INTO recommendations (user_id, catalog_id) VALUES ($1,$2)",
-[user_id, catalog_id]
-);
-
-}
-
-}
-
-res.json(recommendations);
-
-}catch(err){
-
-console.error(err);
-res.status(500).json({error:"AI recommendation failed"});
-
-}
-
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "AI recommendation failed" });
+    }
 });
+
 
 router.post("/chat", async (req, res) => {
     try {

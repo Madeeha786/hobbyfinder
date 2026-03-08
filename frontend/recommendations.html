@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Saved Picks | HobbyFinder</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .loading-state {
+            color: var(--text-light);
+            font-size: 18px;
+            margin-top: 20px;
+        }
+
+        .card-badge {
+            background: var(--light-sage);
+            color: var(--dark-sage);
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+            display: inline-block;
+            margin-bottom: 12px;
+        }
+
+        .card h3 {
+            margin-top: 0;
+            margin-bottom: 10px;
+            color: var(--text-dark);
+        }
+
+        .card p {
+            color: var(--text-light);
+            font-size: 14px;
+            line-height: 1.5;
+            margin-bottom: 0;
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="sidebar">
+        <div class="brand">HobbyFinder</div>
+        <a href="dashboard.html">📍 Discover</a>
+        <a href="chatbot.html">🤖 AI Assistant</a>
+        <a href="recommendations.html" class="active">⭐ Saved Picks</a>
+        <a href="profile.html">👤 My Profile</a>
+        <a href="#" class="logout" onclick="logout()">🚪 Logout</a>
+    </nav>
+
+    <main class="main-content">
+        <div class="page-header">
+            <h1>My Saved Picks</h1>
+            <p>Your AI-generated matches, securely saved in PostgreSQL.</p>
+        </div>
+
+        <div id="loadingState" class="loading-state">
+            ⏳ Fetching your database records...
+        </div>
+        
+        <div id="errorState" class="loading-state" style="display: none; color: #d9534f; background: #fdf7f7; padding: 15px; border-radius: 8px;"></div>
+        
+        <div id="noMatchesState" class="loading-state" style="display: none;">
+            You haven't generated any recommendations yet! Head over to the Discover page first.
+        </div>
+
+        <div class="grid-container" id="savedGrid"></div>
+
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Get user data from localStorage
+            const userId = localStorage.getItem('user_id') || localStorage.getItem('_id') || 'temp-user-id';
+
+            const loadingState = document.getElementById('loadingState');
+            const errorState = document.getElementById('errorState');
+            const noMatchesState = document.getElementById('noMatchesState');
+            const savedGrid = document.getElementById('savedGrid');
+
+            try {
+                // Fetch saved picks from the Express API (which queries PostgreSQL)
+                const response = await fetch(`http://localhost:5000/api/catalog/saved/${userId}`);
+
+                if (!response.ok) {
+                    throw new Error(`Server returned ${response.status}`);
+                }
+
+                const savedItems = await response.json();
+                loadingState.style.display = 'none';
+
+                if (!savedItems || savedItems.length === 0) {
+                    noMatchesState.style.display = 'block';
+                    return;
+                }
+
+                // Render the items
+                savedItems.forEach(item => {
+                    const card = document.createElement('div');
+                    card.className = 'card';
+
+                    let icon = '✨';
+                    let typeDisplay = 'Item';
+
+                    if (item.type === 'movie') { icon = '🎬'; typeDisplay = 'Movie'; }
+                    else if (item.type === 'book') { icon = '📚'; typeDisplay = 'Book'; }
+                    else if (item.type === 'music') { icon = '🎵'; typeDisplay = 'Music'; }
+
+                    const details = item.description || "A highly recommended pick tailored for you.";
+
+                    card.innerHTML = `
+                        <span class="card-badge">${icon} ${typeDisplay}</span>
+                        <h3>${item.title}</h3>
+                        <p>${details}</p>
+                    `;
+                    
+                    savedGrid.appendChild(card);
+                });
+
+            } catch (error) {
+                console.error('Error fetching saved picks:', error);
+                loadingState.style.display = 'none';
+                errorState.style.display = 'block';
+                errorState.innerHTML = `<strong>Connection Error:</strong> Could not reach the backend. Ensure your Express server is running.`;
+            }
+        });
+
+        function logout() {
+            localStorage.clear();
+            window.location.href = 'signup.html';
+        }
+    </script>
+</body>
+</html>
