@@ -2,30 +2,79 @@
 <html>
 
 <head>
-    <title>HobbyFinder</title>
-    <link rel="stylesheet" href="styles.css">
+<title>HobbyFinder - Sign Up</title>
+<link rel="stylesheet" href="styles.css">
+
+<style>
+
+.signup-container{
+height:100vh;
+display:flex;
+justify-content:center;
+align-items:center;
+}
+
+.signup-card{
+background:white;
+padding:40px;
+border-radius:14px;
+box-shadow:0px 6px 20px rgba(0,0,0,0.08);
+width:320px;
+text-align:center;
+}
+
+.signup-card h2{
+margin-bottom:10px;
+}
+
+.signup-card p{
+color:#666;
+margin-bottom:25px;
+}
+
+.signup-card input{
+width:100%;
+padding:10px;
+margin-bottom:15px;
+border-radius:8px;
+border:1px solid #ddd;
+font-size:14px;
+}
+
+.signup-card button{
+width:100%;
+}
+
+.logo{
+font-size:22px;
+font-weight:600;
+margin-bottom:20px;
+color:#7c9077;
+}
+
+</style>
+
 </head>
 
 <body>
 
-<div class="header">
-    🌿 HobbyFinder
+<div class="signup-container">
+
+<div class="signup-card">
+
+<div class="logo">🌿 HobbyFinder</div>
+
+<h2>Create your account</h2>
+
+<p>Discover books, movies and music you'll love.</p>
+
+<input id="username" placeholder="Username">
+
+<input id="password" type="password" placeholder="Password">
+
+<button onclick="signup()">Sign Up</button>
+
 </div>
-
-<div class="container">
-
-    <div class="card">
-
-        <h2>Create your account</h2>
-        <p>Discover books, movies and music you'll love.</p>
-
-        <input id="username" placeholder="Username">
-
-        <input id="password" type="password" placeholder="Password">
-
-        <button onclick="signup()">Sign Up</button>
-
-    </div>
 
 </div>
 
@@ -36,30 +85,53 @@ async function signup(){
 const username = document.getElementById("username").value;
 const password = document.getElementById("password").value;
 
+if(!username || !password){
+
+alert("Please fill all fields");
+return;
+
+}
+
+try{
+
 const res = await fetch("http://localhost:5000/api/users/register",{
+
 method:"POST",
+
 headers:{
 "Content-Type":"application/json"
 },
-body: JSON.stringify({
-username: username,
-password: password
+
+body:JSON.stringify({
+username:username,
+password:password
 })
+
 });
 
 const data = await res.json();
 
-console.log("Server response:", data);   // DEBUG LINE
+console.log("Server response:",data);
 
-localStorage.setItem("user_id", data._id);
+/* store user id */
 
-console.log("Stored user_id:", localStorage.getItem("user_id"));  // DEBUG
+localStorage.setItem("user_id",data._id);
 
-window.location.href = "interests.html";
+/* go to interests page */
+
+window.location.href="interests.html";
+
+}catch(err){
+
+console.error(err);
+alert("Signup failed");
+
+}
 
 }
 
 </script>
 
 </body>
+
 </html>

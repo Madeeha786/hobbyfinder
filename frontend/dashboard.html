@@ -41,6 +41,8 @@ margin-top:8px;
 
 <body>
 
+<h2>Hello!</h2>
+<p>Here are some recommendations based on your interests.</p>
 <div class="header">
 🌿 Your Recommendations
 </div>
@@ -92,9 +94,14 @@ data.forEach(item => {
 const card = document.createElement("div");
 card.className = "recommend-card";
 
+let icon = "🎬";
+
+if(item.type === "book") icon="📚";
+if(item.type === "music") icon="🎧";
+
 card.innerHTML =
-"<h3>" + item.title + "</h3>" +
-"<p>" + item.type + "</p>";
+"<h3>"+icon+" "+item.title+"</h3>"+
+"<p>"+item.type+" recommendation</p>";
 
 container.appendChild(card);
 
