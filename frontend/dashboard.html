@@ -76,6 +76,7 @@ headers:{
 "Content-Type":"application/json"
 },
 body: JSON.stringify({
+user_id: user_id,
 interests: JSON.parse(localStorage.getItem("interests"))
 })
 });
@@ -86,14 +87,14 @@ const container = document.getElementById("results");
 
 container.innerHTML = "";
 
-data.recommendations.forEach(item => {
+data.forEach(item => {
 
 const card = document.createElement("div");
 card.className = "recommend-card";
 
 card.innerHTML =
 "<h3>" + item.title + "</h3>" +
-"<p>" + item.description + "</p>";
+"<p>" + item.type + "</p>";
 
 container.appendChild(card);
 
