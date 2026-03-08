@@ -5,6 +5,50 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard | HobbyFinder</title>
     <link rel="stylesheet" href="styles.css">
+    <style>
+        .loading-state {
+            color: var(--text-light);
+            font-size: 18px;
+            margin-top: 20px;
+        }
+
+        .category-section {
+            margin-bottom: 40px;
+        }
+
+        .category-header {
+            color: var(--earth-brown);
+            border-bottom: 2px solid var(--light-sage);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+
+        /* Improved category badge for the new layout */
+        .card-badge {
+            background: var(--light-sage);
+            color: var(--dark-sage);
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+            display: inline-block;
+            margin-bottom: 12px;
+        }
+
+        .card h3 {
+            margin-top: 0;
+            margin-bottom: 10px;
+            color: var(--text-dark);
+        }
+
+        .card p {
+            color: var(--text-light);
+            font-size: 14px;
+            line-height: 1.5;
+            margin-bottom: 0; /* Removed extra margin since the button is gone */
+        }
+    </style>
 </head>
 <body>
 
@@ -19,41 +63,145 @@
 
     <main class="main-content">
         <div class="page-header">
-            <h1>Welcome back, Explorer!</h1>
-            <p>Here are your personalized, cross-domain AI recommendations for today.</p>
+            <h1 id="welcomeMessage">Welcome back, Explorer!</h1>
+            <p>Here are your personalized AI recommendations powered by our semantic search.</p>
         </div>
 
-        <h2 style="color: var(--earth-brown);">Top Matches</h2>
-        <div class="grid-container">
-            
-            <div class="card">
-                <span class="card-category">🎬 Movie • Sci-Fi</span>
-                <h3>Interstellar</h3>
-                <p>A science fiction space exploration film about astronauts traveling through a wormhole to find a new habitable planet. Matches your interest in astrophysics.</p>
-                <button class="btn-primary">Save to Watchlist</button>
-            </div>
-
-            <div class="card">
-                <span class="card-category">📚 Book • Fantasy</span>
-                <h3>The Hobbit</h3>
-                <p>A classic fantasy adventure novel about a quiet hobbit who journeys across magical lands. Perfect for your love of world-building and adventure.</p>
-                <button class="btn-primary">Save to Reading List</button>
-            </div>
-
-            <div class="card">
-                <span class="card-category">🎵 Music • Ambient</span>
-                <h3>Lo-Fi Beats</h3>
-                <p>Relaxing instrumental music perfect for studying or focusing. Mapped to your preference for calming, atmospheric experiences.</p>
-                <button class="btn-primary">Add to Playlist</button>
-            </div>
-
+        <div id="loadingState" class="loading-state">
+            ⏳ Asking the AI microservice for your perfect matches...
         </div>
+        <div id="errorState" class="loading-state" style="display: none; color: #d9534f; background: #fdf7f7; padding: 15px; border-radius: 8px;"></div>
+        <div id="noMatchesState" class="loading-state" style="display: none;">
+            No matches found right now. Try updating your interests!
+        </div>
+
+        <div id="moviesSection" class="category-section" style="display: none;">
+            <h2 class="category-header">🎬 Movies</h2>
+            <div class="grid-container" id="moviesGrid"></div>
+        </div>
+
+        <div id="booksSection" class="category-section" style="display: none;">
+            <h2 class="category-header">📚 Books</h2>
+            <div class="grid-container" id="booksGrid"></div>
+        </div>
+
+        <div id="musicSection" class="category-section" style="display: none;">
+            <h2 class="category-header">🎵 Music</h2>
+            <div class="grid-container" id="musicGrid"></div>
+        </div>
+
     </main>
 
     <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            // 1. Get user data from localStorage
+            const username = localStorage.getItem('username') || 'Explorer';
+            const userId = localStorage.getItem('user_id') || localStorage.getItem('_id') || 'temp-user-id';
+            const savedInterests = JSON.parse(localStorage.getItem('savedInterests')) || { movies: [], books: [], songs: [] };
+
+            // 2. Personalize the header
+            document.getElementById('welcomeMessage').innerText = `Welcome back, ${username}!`;
+
+            const loadingState = document.getElementById('loadingState');
+            const errorState = document.getElementById('errorState');
+            const noMatchesState = document.getElementById('noMatchesState');
+
+            try {
+                // 3. Fetch recommendations from the Express API (which calls Flask & PostgreSQL)
+                const response = await fetch('http://localhost:5000/api/ai/recommend', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        interests: savedInterests,
+                        user_id: userId
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Server returned ${response.status}`);
+                }
+
+                const recommendations = await response.json();
+                loadingState.style.display = 'none';
+
+                if (!recommendations || recommendations.length === 0) {
+                    noMatchesState.style.display = 'block';
+                    return;
+                }
+
+                // 4. Setup Grid References and Visibility Flags
+                const moviesGrid = document.getElementById('moviesGrid');
+                const booksGrid = document.getElementById('booksGrid');
+                const musicGrid = document.getElementById('musicGrid');
+
+                let hasMovies = false;
+                let hasBooks = false;
+                let hasMusic = false;
+
+                // 5. Sort and Render Recommendations Categorically
+                recommendations.forEach(item => {
+                    const card = document.createElement('div');
+                    card.className = 'card';
+
+                    let icon = '✨';
+                    let typeDisplay = 'Item';
+                    let targetGrid = null;
+
+                    // Categorize based on item type
+                    if (item.type === 'movie') { 
+                        icon = '🎬'; 
+                        typeDisplay = 'Movie'; 
+                        targetGrid = moviesGrid;
+                        hasMovies = true;
+                    } else if (item.type === 'book') { 
+                        icon = '📚'; 
+                        typeDisplay = 'Book'; 
+                        targetGrid = booksGrid;
+                        hasBooks = true;
+                    } else if (item.type === 'music') { 
+                        icon = '🎵'; 
+                        typeDisplay = 'Music'; 
+                        targetGrid = musicGrid;
+                        hasMusic = true;
+                    }
+
+                    // Use the description retrieved from PostgreSQL (fallback provided just in case)
+                    const details = item.description || `A fantastic ${item.type} perfectly matching your personalized profile.`;
+
+                    // Generate Card (No View Details button, No % Match)
+                    card.innerHTML = `
+                        <span class="card-badge">${icon} ${typeDisplay}</span>
+                        <h3>${item.title}</h3>
+                        <p>${details}</p>
+                    `;
+                    
+                    if (targetGrid) {
+                        targetGrid.appendChild(card);
+                    }
+                });
+
+                // 6. Reveal the sections that actually contain data
+                if (hasMovies) document.getElementById('moviesSection').style.display = 'block';
+                if (hasBooks) document.getElementById('booksSection').style.display = 'block';
+                if (hasMusic) document.getElementById('musicSection').style.display = 'block';
+
+            } catch (error) {
+                console.error('Error fetching recommendations:', error);
+                loadingState.style.display = 'none';
+                errorState.style.display = 'block';
+                errorState.innerHTML = `
+                    <strong>Connection Error:</strong> Could not reach the backend. Please make sure: <br>
+                    1. Express server is running on port 5000 <br>
+                    2. Flask AI server is running on port 8000 <br>
+                    3. PostgreSQL server is active.
+                `;
+            }
+        });
+
         function logout() {
-            // Clear auth token and redirect
-            localStorage.removeItem('token');
+            localStorage.clear();
             window.location.href = 'signup.html';
         }
     </script>

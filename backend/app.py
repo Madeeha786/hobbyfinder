@@ -72,7 +72,8 @@ def recommend():
         results.append({
             "title": item["title"],
             "type": item["type"],
-            "score": float(score)
+            "score": float(score),
+            "description": item["description"]
         })
 
     return jsonify({
