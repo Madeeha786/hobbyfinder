@@ -1,73 +1,49 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<link rel="stylesheet" href="styles.css">
-<style>
-    .chat-box{
-background:white;
-border-radius:12px;
-padding:20px;
-height:400px;
-overflow-y:auto;
-box-shadow:0px 4px 15px rgba(0,0,0,0.08);
-}
-
-.message-user{
-text-align:right;
-margin:10px;
-}
-
-.message-ai{
-text-align:left;
-margin:10px;
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Assistant | HobbyFinder</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .chat-box { background: white; border-radius: 12px; height: 60vh; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); display: flex; flex-direction: column; }
+        .chat-history { flex-grow: 1; overflow-y: auto; margin-bottom: 20px; border: 1px solid #eee; padding: 15px; border-radius: 8px; background: #fafafa;}
+        .bot-msg { background: var(--light-sage); padding: 10px 15px; border-radius: 15px 15px 15px 0; margin-bottom: 10px; width: fit-content; max-width: 70%; color: var(--earth-brown);}
+        .user-msg { background: var(--earth-brown); color: white; padding: 10px 15px; border-radius: 15px 15px 0 15px; margin-bottom: 10px; align-self: flex-end; width: fit-content; max-width: 70%; margin-left: auto;}
+        .chat-input-area { display: flex; gap: 10px; }
+        .chat-input-area input { flex-grow: 1; padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 15px; }
+        .chat-input-area button { width: auto; margin-top: 0; padding: 12px 25px; }
+    </style>
 </head>
-
 <body>
 
-<div class="header">HobbyFinder Assistant</div>
+    <nav class="sidebar">
+        <div class="brand">HobbyFinder</div>
+        <a href="dashboard.html">📍 Discover</a>
+        <a href="chatbot.html" class="active">🤖 AI Assistant</a>
+        <a href="recommendations.html">⭐ Saved Picks</a>
+        <a href="profile.html">👤 My Profile</a>
+        <a href="#" class="logout" onclick="logout()">🚪 Logout</a>
+    </nav>
 
-<div class="container">
+    <main class="main-content">
+        <div class="page-header">
+            <h1>AI Curation Assistant</h1>
+            <p>Tell me what you're in the mood for, and I'll query the database.</p>
+        </div>
 
-<div class="card">
-
-<div id="chat"></div>
-
-<input id="message" placeholder="Ask for recommendations...">
-
-<button onclick="send()">Send</button>
-
-</div>
-
-</div>
-
-<script>
-
-async function send(){
-
-let msg=document.getElementById("message").value;
-
-let chat=document.getElementById("chat");
-
-chat.innerHTML+="<p><b>You:</b> "+msg+"</p>";
-
-const res = await fetch("http://127.0.0.1:8000/chat",{
-method:"POST",
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify({
-user_id:localStorage.getItem("user_id"),
-message:msg
-})
-});
-
-const data=await res.json();
-
-chat.innerHTML+="<p><b>AI:</b> "+data.reply+"</p>";
-
-}
-
-</script>
+        <div class="chat-box">
+            <div class="chat-history" id="chatHistory">
+                <div class="bot-msg">Hi! I see you like Sci-Fi movies. Are you looking for a book or song with a similar vibe today?</div>
+                <div class="user-msg">I want a book similar to Blade Runner.</div>
+                <div class="bot-msg">Searching the PostgreSQL catalog... I recommend "Do Androids Dream of Electric Sheep?". Would you like me to save it?</div>
+            </div>
+            <div class="chat-input-area">
+                <input type="text" placeholder="Type your message here..." id="chatInput">
+                <button class="btn-primary">Send</button>
+            </div>
+        </div>
+    </main>
 
 </body>
 </html>

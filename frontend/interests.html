@@ -1,162 +1,263 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="en">
 <head>
-<title>Select Interests</title>
-<link rel="stylesheet" href="styles.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Select Interests | HobbyFinder</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Focused layout for onboarding/settings */
+        body {
+            background-color: var(--cream-bg);
+            background-image: radial-gradient(var(--light-sage) 1px, transparent 1px);
+            background-size: 20px 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 40px 20px;
+            box-sizing: border-box;
+        }
 
-<style>
+        .interests-container {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            width: 100%;
+            max-width: 800px;
+            border-top: 6px solid var(--sage-green);
+        }
 
-.category-buttons{
-    text-align:center;
-    margin-bottom:20px;
-}
+        .page-header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: none;
+        }
 
-.category-buttons button{
-    margin:5px;
-}
+        .page-header h1 {
+            color: var(--earth-brown);
+            margin-bottom: 10px;
+            font-size: 32px;
+        }
 
-.genre-grid{
-    display:grid;
-    grid-template-columns:repeat(3,1fr);
-    gap:10px;
-    margin-top:15px;
-}
+        .page-header p {
+            color: var(--text-light);
+        }
 
-.genre-btn{
-    padding:10px;
-    border-radius:8px;
-    border:1px solid #ccc;
-    cursor:pointer;
-    background:white;
-    transition:0.2s;
-}
+        .category-section {
+            margin-bottom: 30px;
+        }
 
-.genre-btn:hover{
-    transform:scale(1.05);
-}
+        .category-section h3 {
+            color: var(--dark-sage);
+            border-bottom: 2px solid var(--light-sage);
+            padding-bottom: 8px;
+            margin-bottom: 15px;
+            font-size: 20px;
+        }
 
-.genre-btn.selected{
-    background:#7A8F73;
-    color:white;
-    border:none;
-}
+        /* The Grid of Choice Pills */
+        .genre-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
 
-</style>
+        .genre-pill {
+            background-color: #f1f1f1;
+            color: var(--text-dark);
+            border: 2px solid transparent;
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            user-select: none;
+        }
 
+        .genre-pill:hover {
+            background-color: var(--light-sage);
+        }
+
+        /* Selected State */
+        .genre-pill.selected {
+            background-color: var(--sage-green);
+            color: white;
+            border-color: var(--dark-sage);
+            box-shadow: 0 4px 10px rgba(157, 193, 131, 0.4);
+        }
+
+        #errorMessage {
+            color: #d9534f;
+            background: #fdf7f7;
+            padding: 10px;
+            border-radius: 6px;
+            text-align: center;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .action-bar {
+            text-align: center;
+            margin-top: 40px;
+        }
+
+        .action-bar button {
+            padding: 14px 40px;
+            font-size: 18px;
+            width: auto;
+            min-width: 250px;
+        }
+    </style>
 </head>
-
 <body>
 
-<div class="header">
-🌿 Choose Your Interests
-</div>
+    <div class="interests-container">
+        <div class="page-header">
+            <h1>Personalize Your Universe</h1>
+            <p>Select the genres you love. Our AI will map these to our PostgreSQL catalog.</p>
+        </div>
 
-<div class="container">
+        <div id="errorMessage"></div>
 
-<div class="card">
+        <div class="category-section">
+            <h3>🎬 Favorite Movie Genres</h3>
+            <div class="genre-grid" id="movies-grid">
+                <div class="genre-pill" data-category="movies" data-value="Sci-Fi">Sci-Fi</div>
+                <div class="genre-pill" data-category="movies" data-value="Action">Action</div>
+                <div class="genre-pill" data-category="movies" data-value="Thriller">Thriller</div>
+                <div class="genre-pill" data-category="movies" data-value="Drama">Drama</div>
+                <div class="genre-pill" data-category="movies" data-value="Comedy">Comedy</div>
+                <div class="genre-pill" data-category="movies" data-value="Documentary">Documentary</div>
+                <div class="genre-pill" data-category="movies" data-value="Horror">Horror</div>
+                <div class="genre-pill" data-category="movies" data-value="Cyberpunk">Cyberpunk</div>
+            </div>
+        </div>
 
-<h2>Select Categories</h2>
+        <div class="category-section">
+            <h3>📚 Favorite Book Genres</h3>
+            <div class="genre-grid" id="books-grid">
+                <div class="genre-pill" data-category="books" data-value="Science Fiction">Science Fiction</div>
+                <div class="genre-pill" data-category="books" data-value="Fantasy">Fantasy</div>
+                <div class="genre-pill" data-category="books" data-value="Mystery">Mystery</div>
+                <div class="genre-pill" data-category="books" data-value="Biography">Biography</div>
+                <div class="genre-pill" data-category="books" data-value="Self-Help">Self-Help</div>
+                <div class="genre-pill" data-category="books" data-value="Historical">Historical</div>
+                <div class="genre-pill" data-category="books" data-value="Romance">Romance</div>
+                <div class="genre-pill" data-category="books" data-value="Space Opera">Space Opera</div>
+            </div>
+        </div>
 
-<div class="category-buttons">
+        <div class="category-section">
+            <h3>🎵 Favorite Music Genres</h3>
+            <div class="genre-grid" id="songs-grid">
+                <div class="genre-pill" data-category="songs" data-value="Lo-Fi Beats">Lo-Fi Beats</div>
+                <div class="genre-pill" data-category="songs" data-value="Ambient">Ambient</div>
+                <div class="genre-pill" data-category="songs" data-value="Pop">Pop</div>
+                <div class="genre-pill" data-category="songs" data-value="Jazz">Jazz</div>
+                <div class="genre-pill" data-category="songs" data-value="Classical">Classical</div>
+                <div class="genre-pill" data-category="songs" data-value="Rock">Rock</div>
+                <div class="genre-pill" data-category="songs" data-value="Electronic">Electronic</div>
+                <div class="genre-pill" data-category="songs" data-value="Instrumental">Instrumental</div>
+            </div>
+        </div>
 
-<button onclick="showGenres('books')">📚 Books</button>
-<button onclick="showGenres('movies')">🎬 Movies</button>
-<button onclick="showGenres('songs')">🎧 Songs</button>
+        <div class="action-bar">
+            <button class="btn-primary" id="saveBtn" onclick="saveInterests()">Save & Discover</button>
+        </div>
+    </div>
 
-</div>
+    <script>
+        // State object to hold selected arrays
+        const selectedInterests = {
+            movies: [],
+            books: [],
+            songs: []
+        };
 
-<div id="genres"></div>
+        // 1. Add Event Listeners to toggle selection visually and in our state object
+        document.querySelectorAll('.genre-pill').forEach(pill => {
+            pill.addEventListener('click', function() {
+                const category = this.getAttribute('data-category');
+                const value = this.getAttribute('data-value');
 
-<br>
+                // Toggle CSS Class
+                this.classList.toggle('selected');
 
-<button onclick="save()">Continue</button>
+                // Update Array State
+                if (this.classList.contains('selected')) {
+                    selectedInterests[category].push(value);
+                } else {
+                    selectedInterests[category] = selectedInterests[category].filter(item => item !== value);
+                }
+            });
+        });
 
-</div>
+        // 2. The function to handle the API request
+        async function saveInterests() {
+            const errorDiv = document.getElementById('errorMessage');
+            const saveBtn = document.getElementById('saveBtn');
 
-</div>
+            // Reset UI
+            errorDiv.style.display = 'none';
+            
+            // Check if user picked at least one thing
+            if (selectedInterests.movies.length === 0 && selectedInterests.books.length === 0 && selectedInterests.songs.length === 0) {
+                errorDiv.innerText = "Please select at least one interest to get started!";
+                errorDiv.style.display = 'block';
+                return;
+            }
 
-<script>
+            saveBtn.innerText = 'Saving...';
+            saveBtn.disabled = true;
 
-const genres = {
-books:["Fantasy","Sci-Fi","Mystery"],
-movies:["Action","Adventure","Sci-Fi"],
-songs:["Lo-Fi","Ambient","Jazz"]
-};
+            // Optional: Grab the user_id if your backend requires it (req.body.user_id)
+            // You can save this in localStorage during the signup phase.
 
-let selections = {
-books:[],
-movies:[],
-songs:[]
-};
+            //const userId = localStorage.getItem('userId') || 'mock-user-id-for-demo';
+            const userId = localStorage.getItem('user_id') || 'abcdefghij12345';
 
-function showGenres(type){
+            try {
+                // Connects to your backend/routes/interests.js
+                const response = await fetch('http://localhost:5000/api/interests', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        // Include Auth token if your route has middleware
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    },
+                    body: JSON.stringify({
+                        user_id: userId,
+                        books: selectedInterests.books,
+                        movies: selectedInterests.movies,
+                        songs: selectedInterests.songs
+                    })
+                });
 
-const container=document.getElementById("genres");
+                const data = await response.json();
 
-container.innerHTML="<h3>Select "+type+" genres</h3>";
-
-let grid=document.createElement("div");
-grid.className="genre-grid";
-
-genres[type].forEach(g=>{
-
-let btn=document.createElement("div");
-btn.className="genre-btn";
-btn.innerText=g;
-
-if(selections[type].includes(g)){
-btn.classList.add("selected");
-}
-
-btn.onclick=function(){
-
-if(selections[type].includes(g)){
-
-selections[type]=selections[type].filter(x=>x!==g);
-btn.classList.remove("selected");
-
-}else{
-
-selections[type].push(g);
-btn.classList.add("selected");
-
-}
-
-};
-
-grid.appendChild(btn);
-
-});
-
-container.appendChild(grid);
-
-}
-
-async function save(){
-
-const user_id=localStorage.getItem("user_id");
-
-localStorage.setItem("interests", JSON.stringify(selections));
-
-await fetch("http://localhost:5000/api/interests",{
-method:"POST",
-headers:{
-"Content-Type":"application/json"
-},
-body:JSON.stringify({
-user_id:user_id,
-books:selections.books,
-movies:selections.movies,
-songs:selections.songs
-})
-});
-
-window.location.href="dashboard.html";
-
-}
-
-</script>
+                if (response.ok || response.status === 201) {
+                    // Success! Save selections locally for the dashboard demo, then redirect
+                    localStorage.setItem('savedInterests', JSON.stringify(selectedInterests));
+                    window.location.href = 'dashboard.html';
+                } else {
+                    // Handle Validation error from backend
+                    errorDiv.innerText = data.message || 'Failed to save interests.';
+                    errorDiv.style.display = 'block';
+                    saveBtn.innerText = 'Save & Discover';
+                    saveBtn.disabled = false;
+                }
+            } catch (err) {
+                console.error('Error saving interests:', err);
+                // Graceful fallback for the presentation if the Node.js server acts up:
+                // We'll save locally and let them proceed to the dashboard anyway!
+                localStorage.setItem('savedInterests', JSON.stringify(selectedInterests));
+                window.location.href = 'dashboard.html';
+            }
+        }
+    </script>
 
 </body>
 </html>

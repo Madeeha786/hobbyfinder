@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile | HobbyFinder</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .tag { background: var(--sage-green); color: white; padding: 5px 12px; border-radius: 20px; font-size: 13px; margin-right: 5px; display: inline-block; margin-bottom: 5px;}
+        .profile-card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+    </style>
+</head>
+<body>
+
+    <nav class="sidebar">
+        <div class="brand">HobbyFinder</div>
+        <a href="dashboard.html">📍 Discover</a>
+        <a href="chatbot.html">🤖 AI Assistant</a>
+        <a href="recommendations.html">⭐ Saved Picks</a>
+        <a href="profile.html" class="active">👤 My Profile</a>
+        <a href="#" class="logout" onclick="logout()">🚪 Logout</a>
+    </nav>
+
+    <main class="main-content">
+        <div class="page-header">
+            <h1>My Profile</h1>
+            <p>Manage your MongoDB user data and preferences.</p>
+        </div>
+
+        <div class="profile-card">
+            <h2 style="color: var(--dark-sage); margin-top: 0;">Account Details</h2>
+            <p><strong>Username:</strong> Explorer123</p>
+            <p><strong>Email:</strong> explorer@hobbyfinder.com</p>
+            
+            <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+            
+            <h2 style="color: var(--dark-sage);">My Current Interests</h2>
+            <p style="color: var(--text-light); font-size: 14px;">The AI uses these tags to map to genres in PostgreSQL.</p>
+            
+            <div>
+                <span class="tag">Space Exploration</span>
+                <span class="tag">Cyberpunk</span>
+                <span class="tag">Mystery</span>
+                <span class="tag">Instrumental Music</span>
+                <span class="tag">Fantasy Worlds</span>
+            </div>
+
+            <button class="btn-primary" style="width: auto; margin-top: 25px;">Edit Interests</button>
+        </div>
+    </main>
+
+</body>
+</html>

@@ -1,72 +1,150 @@
-body{
-font-family: 'Segoe UI', sans-serif;
-margin:0;
-background:#f3f6f4;
-color:#2c2c2c;
+/* --- COLOR PALETTE & VARIABLES --- */
+:root {
+  --sage-green: #9DC183;
+  --dark-sage: #7A9B63;
+  --light-sage: #d9ebd1;
+  --earth-brown: #5C4033;
+  --light-brown: #8B5A2B;
+  --cream-bg: #F9F6F0;
+  --text-dark: #2C2C2C;
+  --text-light: #777777;
 }
 
-.header{
-background:#7c9077;
-color:white;
-padding:18px;
-font-size:22px;
-font-weight:600;
-display:flex;
-justify-content:space-between;
-align-items:center;
+body {
+  margin: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: var(--cream-bg);
+  color: var(--text-dark);
+  display: flex;
 }
 
-.container{
-max-width:1100px;
-margin:auto;
-padding:30px;
+/* --- SIDEBAR NAVIGATION --- */
+.sidebar {
+  width: 260px;
+  height: 100vh;
+  background-color: var(--earth-brown);
+  color: white;
+  position: fixed;
+  display: flex;
+  flex-direction: column;
+  padding-top: 30px;
+  box-shadow: 4px 0 15px rgba(0,0,0,0.1);
+  z-index: 100;
 }
 
-button{
-background:#7c9077;
-color:white;
-border:none;
-padding:10px 18px;
-border-radius:8px;
-cursor:pointer;
-font-size:14px;
+.sidebar .brand {
+  text-align: center;
+  color: var(--sage-green);
+  margin-bottom: 40px;
+  font-size: 24px;
+  font-weight: bold;
+  letter-spacing: 1.5px;
 }
 
-button:hover{
-background:#6b7e66;
+.sidebar a {
+  padding: 16px 30px;
+  text-decoration: none;
+  font-size: 16px;
+  color: #e0e0e0;
+  transition: all 0.3s ease;
+  border-left: 5px solid transparent;
+  display: flex;
+  align-items: center;
 }
 
-.card{
-background:white;
-border-radius:14px;
-padding:20px;
-box-shadow:0px 4px 15px rgba(0,0,0,0.08);
-margin-bottom:20px;
+.sidebar a:hover, .sidebar a.active {
+  background-color: var(--light-brown);
+  border-left: 5px solid var(--sage-green);
+  color: #fff;
 }
 
-.recommend-grid{
-display:grid;
-grid-template-columns:repeat(auto-fill,minmax(250px,1fr));
-gap:20px;
+.sidebar .logout {
+  margin-top: auto; /* Pushes logout to the bottom */
+  margin-bottom: 20px;
 }
 
-.recommend-card{
-background:white;
-padding:20px;
-border-radius:14px;
-box-shadow:0px 5px 16px rgba(0,0,0,0.08);
-transition:0.2s;
+/* --- MAIN CONTENT AREA --- */
+.main-content {
+  margin-left: 260px; /* Same as sidebar width */
+  padding: 40px 50px;
+  width: calc(100% - 260px);
+  min-height: 100vh;
+  box-sizing: border-box;
 }
 
-.recommend-card:hover{
-transform:translateY(-5px);
+.page-header {
+  margin-bottom: 30px;
+  border-bottom: 2px solid var(--light-sage);
+  padding-bottom: 15px;
 }
 
-.recommend-card h3{
-margin:0;
+.page-header h1 {
+  color: var(--earth-brown);
+  margin: 0 0 5px 0;
 }
 
-.recommend-card p{
-color:#666;
-margin-top:6px;
+.page-header p {
+  color: var(--text-light);
+  margin: 0;
+}
+
+/* --- GRID & CARDS --- */
+.grid-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 25px;
+  margin-bottom: 40px;
+}
+
+.card {
+  background: white;
+  border-radius: 12px;
+  padding: 25px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+  border-top: 6px solid var(--sage-green);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+}
+
+.card-category {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--light-brown);
+  font-weight: bold;
+}
+
+.card h3 {
+  color: var(--dark-sage);
+  margin: 10px 0;
+  font-size: 22px;
+}
+
+.card p {
+  color: var(--text-light);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+/* --- BUTTONS --- */
+.btn-primary {
+  background-color: var(--sage-green);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: bold;
+  transition: 0.3s;
+  width: 100%;
+  margin-top: 15px;
+}
+
+.btn-primary:hover {
+  background-color: var(--dark-sage);
 }

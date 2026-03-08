@@ -1,137 +1,190 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="en">
 <head>
-<title>HobbyFinder - Sign Up</title>
-<link rel="stylesheet" href="styles.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up | HobbyFinder</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Specific layout to perfectly center the auth card */
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: var(--cream-bg);
+            margin: 0;
+            background-image: radial-gradient(var(--light-sage) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
 
-<style>
+        .auth-container {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            width: 100%;
+            max-width: 400px;
+            border-top: 6px solid var(--sage-green);
+        }
 
-.signup-container{
-height:100vh;
-display:flex;
-justify-content:center;
-align-items:center;
-}
+        .auth-container h1 {
+            color: var(--earth-brown);
+            text-align: center;
+            margin-bottom: 5px;
+            font-size: 28px;
+        }
 
-.signup-card{
-background:white;
-padding:40px;
-border-radius:14px;
-box-shadow:0px 6px 20px rgba(0,0,0,0.08);
-width:320px;
-text-align:center;
-}
+        .auth-container p.subtitle {
+            text-align: center;
+            color: var(--text-light);
+            margin-bottom: 25px;
+            font-size: 14px;
+        }
 
-.signup-card h2{
-margin-bottom:10px;
-}
+        .form-group {
+            margin-bottom: 18px;
+        }
 
-.signup-card p{
-color:#666;
-margin-bottom:25px;
-}
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-dark);
+            font-weight: 600;
+            font-size: 14px;
+        }
 
-.signup-card input{
-width:100%;
-padding:10px;
-margin-bottom:15px;
-border-radius:8px;
-border:1px solid #ddd;
-font-size:14px;
-}
+        .form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 15px;
+            box-sizing: border-box;
+            transition: border-color 0.3s;
+        }
 
-.signup-card button{
-width:100%;
-}
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--sage-green);
+            box-shadow: 0 0 5px rgba(157, 193, 131, 0.3);
+        }
 
-.logo{
-font-size:22px;
-font-weight:600;
-margin-bottom:20px;
-color:#7c9077;
-}
+        #errorMessage {
+            color: #d9534f;
+            font-size: 14px;
+            text-align: center;
+            margin-bottom: 15px;
+            display: none; /* Hidden by default */
+        }
 
-</style>
+        .auth-footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 14px;
+            color: var(--text-light);
+        }
 
+        .auth-footer a {
+            color: var(--earth-brown);
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .auth-footer a:hover {
+            color: var(--light-brown);
+        }
+    </style>
 </head>
-
 <body>
 
-<div class="signup-container">
+    <div class="auth-container">
+        <h1>Join HobbyFinder</h1>
+        <p class="subtitle">Create an account to start discovering.</p>
 
-<div class="signup-card">
+        <div id="errorMessage"></div>
 
-<div class="logo">🌿 HobbyFinder</div>
+        <form id="signupForm" onsubmit="handleSignup(event)">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" placeholder="Explorer123" required>
+            </div>
 
-<h2>Create your account</h2>
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" placeholder="explorer@hobbyfinder.com" required>
+            </div>
 
-<p>Discover books, movies and music you'll love.</p>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" placeholder="••••••••" required minlength="6">
+            </div>
 
-<input id="username" placeholder="Username">
+            <button type="submit" class="btn-primary" id="submitBtn" style="margin-top: 10px;">Create Account</button>
+        </form>
 
-<input id="password" type="password" placeholder="Password">
+        <div class="auth-footer">
+            Already have an account? <a href="login.html">Login here</a>
+        </div>
+    </div>
 
-<button onclick="signup()">Sign Up</button>
+    <script>
+        async function handleSignup(event) {
+            event.preventDefault(); // Stop default form submission
 
-</div>
+            // 1. Grab DOM elements
+            const username = document.getElementById('username').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const errorDiv = document.getElementById('errorMessage');
+            const submitBtn = document.getElementById('submitBtn');
 
-</div>
+            // 2. Reset UI state
+            errorDiv.style.display = 'none';
+            submitBtn.innerText = 'Creating...';
+            submitBtn.disabled = true;
 
-<script>
+            try {
+                // 3. Connect to your actual Node.js Backend 
+                // (Adjust the port if your backend runs on something other than 5000)
+                const response = await fetch('http://localhost:5000/api/users/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        username: username,
+                        email: email,
+                        password: password
+                    })
+                });
 
-async function signup(){
+                const data = await response.json();
 
-const username = document.getElementById("username").value;
-const password = document.getElementById("password").value;
-
-if(!username || !password){
-
-alert("Please fill all fields");
-return;
-
-}
-
-try{
-
-const res = await fetch("http://localhost:5000/api/users/register",{
-
-method:"POST",
-
-headers:{
-"Content-Type":"application/json"
-},
-
-body:JSON.stringify({
-username:username,
-password:password
-})
-
-});
-
-const data = await res.json();
-
-console.log("Server response:",data);
-
-/* store user id */
-
-localStorage.setItem("user_id",data._id);
-
-/* go to interests page */
-
-window.location.href="interests.html";
-
-}catch(err){
-
-console.error(err);
-alert("Signup failed");
-
-}
-
-}
-
-</script>
+                if (response.ok) {
+                    // 4. Success: Save token and redirect to interests page
+                    localStorage.setItem('token', data.token); // Save the JWT token
+                    localStorage.setItem('username', data.username); // Save username for dashboard
+                    
+                    // Redirect new users to pick their initial interests
+                    window.location.href = 'interests.html'; 
+                } else {
+                    // 5. Backend Error: Show the error message from the server
+                    errorDiv.innerText = data.message || 'Registration failed. Please try again.';
+                    errorDiv.style.display = 'block';
+                    submitBtn.innerText = 'Create Account';
+                    submitBtn.disabled = false;
+                }
+            } catch (err) {
+                // 6. Network Error (e.g., backend is not running)
+                console.error('Error during signup:', err);
+                errorDiv.innerText = 'Cannot connect to the server. Is the backend running?';
+                errorDiv.style.display = 'block';
+                submitBtn.innerText = 'Create Account';
+                submitBtn.disabled = false;
+            }
+        }
+    </script>
 
 </body>
-
 </html>
