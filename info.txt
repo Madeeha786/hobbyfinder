@@ -1,0 +1,149 @@
+Example python 'results' object
+[
+ {'title': 'The Dark Knight',       'type': 'movie', 'score': 0.32458463311195374, 'description': 'A thrilling superhero film featuring Batman and the Joker.'},
+ {'title': 'Inception',             'type': 'movie', 'score': 0.29203930497169495, 'description': 'A mind bending sci-fi thriller about dreams within dreams and subconscious manipulation.'},
+ {'title': 'The Lord of the Rings', 'type': 'movie', 'score': 0.27445492148399353, 'description': 'A fantasy epic about a journey to destroy a powerful ring and defeat dark forces.'},
+ {'title': 'Forrest Gump',          'type': 'movie', 'score': 0.2705664336681366, 'description': 'A touching drama following the extraordinary life journey of Forrest Gump.'},
+ {'title': 'Back to the Future',    'type': 'movie', 'score': 0.2402477264404297, 'description': 'A fun sci-fi comedy about time travel and adventure.'},
+ 
+ {'title': 'Sherlock Holmes',       'type': 'book', 'score': 0.326447069644928, 'description': 'A famous detective mystery series featuring Sherlock Holmes solving crimes using deduction and investigation in Victorian London.'},
+ {'title': 'Dracula',               'type': 'book', 'score': 0.23669551312923431, 'description': 'A gothic horror story about the legendary vampire Count Dracula.'},
+ {'title': 'The Hobbit',            'type': 'book', 'score': 0.21918398141860962, 'description': 'A classic fantasy adventure novel about a quiet hobbit who journeys across magical lands with dwarves to reclaim a lost treasure.'},
+ {'title': 'The Martian',           'type': 'book', 'score': 0.17353376746177673, 'description': 'A survival story about an astronaut stranded on Mars using science to stay alive.'},
+ {'title': '1984',                  'type': 'book', 'score': 0.16986806690692902, 'description': 'A dystopian novel exploring surveillance, authoritarianism and freedom.'},
+ 
+ {'title': 'Lo-Fi Beats',           'type': 'music', 'score': 0.6222313642501831, 'description': 'Relaxing lo-fi instrumental music perfect for studying, relaxing, or focusing with calm beats and ambient sound.'},
+ {'title': 'Chillhop Essentials',   'type': 'music', 'score': 0.535524308681488, 'description': 'Relaxing lo-fi hip hop beats perfect for studying and unwinding.'},
+ {'title': 'Electronic Dreams',     'type': 'music', 'score': 0.3769865036010742, 'description': 'Atmospheric electronic music inspired by futuristic soundscapes.'},
+ {'title': 'Rock Legends',          'type': 'music', 'score': 0.3614323139190674, 'description': 'Energetic rock music inspired by legendary bands.'},
+ {'title': 'Ambient Focus',         'type': 'music', 'score': 0.34684646129608154, 'description': 'Soft ambient music designed for calm concentration and relaxation.'}
+ ]
+
+
+Then return via:
+return jsonify({
+        "recommendations": results
+    })
+
+
+[user_text] === ['LoFi Beats']
+cat_descriptions === ['Relaxing lo-fi instrumental music perfect for studying, relaxing, or focusing with calm beats and ambient sound.', 'Relaxing lo-fi hip hop beats perfect for studying and unwinding.', 'Soft ambient music designed for calm concentration and relaxation.', 'Dramatic orchestral music inspired by adventure and fantasy films.', 'Relaxing smooth jazz music perfect for evening listening.', 'Soft classical music ideal for studying and concentration.', 'Energetic rock music inspired by legendary bands.', 'Atmospheric electronic music inspired by futuristic soundscapes.']
+
+
+Backup function
+@app.route("/recommend", methods=["POST"])
+def recommend():
+    data = request.json
+    interests_data = data.get("interests", {})
+    
+    # Fallback just in case the JSON structure differs
+    if not interests_data and "movies" in data:
+        interests_data = data
+        
+    catalog = get_catalog()
+    results = []
+
+    # Map the JSON keys to the PostgreSQL 'type' column
+    category_map = {
+        "movies": "movie",
+        "books": "book",
+        "songs": "music"
+    }
+
+    # Run a dedicated AI search for EACH category the user selected
+    for category_key, db_type in category_map.items():
+        cat_interests = interests_data.get(category_key, [])
+        
+        # If the user didn't pick any genres for this category, skip it
+        if not cat_interests:
+            continue
+
+        # 1. Filter catalog down to only this specific type
+        cat_items = [c for c in catalog if c["type"] == db_type]
+        if not cat_items:
+            continue
+
+        # 2. Encode user's interests specifically for this type
+        user_text = " ".join(cat_interests)
+        user_embedding = model.encode([user_text])
+        
+        # 3. Encode catalog descriptions for this type
+        cat_descriptions = [c["description"] for c in cat_items]
+        cat_embeddings = model.encode(cat_descriptions)
+
+        # 4. Calculate similarities
+        similarities = cosine_similarity(user_embedding, cat_embeddings)[0]
+
+        ranked = sorted(
+            zip(cat_items, similarities),
+            key=lambda x: x[1],
+            reverse=True
+        )
+
+        # 5. Append the top 5 matches for THIS specific category
+        for item, score in ranked[:5]:
+            results.append({
+                "title": item["title"],
+                "type": item["type"],
+                "score": float(score),
+                "description": item["description"]
+            })
+    
+    #print(results, flush=True)
+
+    return jsonify({
+        "recommendations": results
+    })
+
+
+
+
+
+
+
+
+
+The kinda 'recommendations' response to be received/mimicked in dashboard.html
+
+0
+: 
+{description: 'A thrilling superhero film featuring Batman and the Joker.', score: 0.32458463311195374, title: 'The Dark Knight', type: 'movie'}
+1
+: 
+{description: 'A mind bending sci-fi thriller about dreams within dreams and subconscious manipulation.', score: 0.29203930497169495, title: 'Inception', type: 'movie'}
+2
+: 
+{description: 'A fantasy epic about a journey to destroy a powerful ring and defeat dark forces.', score: 0.27445492148399353, title: 'The Lord of the Rings', type: 'movie'}
+3
+: 
+{description: 'A touching drama following the extraordinary life journey of Forrest Gump.', score: 0.2705664336681366, title: 'Forrest Gump', type: 'movie'}
+4
+: 
+{description: 'A fun sci-fi comedy about time travel and adventure.', score: 0.2402477264404297, title: 'Back to the Future', type: 'movie'}
+5
+: 
+{description: 'A famous detective mystery series featuring Sherlo… deduction and investigation in Victorian London.', score: 0.326447069644928, title: 'Sherlock Holmes', type: 'book'}
+6
+: 
+{description: 'A gothic horror story about the legendary vampire Count Dracula.', score: 0.23669551312923431, title: 'Dracula', type: 'book'}
+7
+: 
+{description: 'A classic fantasy adventure novel about a quiet ho…al lands with dwarves to reclaim a lost treasure.', score: 0.21918398141860962, title: 'The Hobbit', type: 'book'}
+8
+: 
+{description: 'A survival story about an astronaut stranded on Mars using science to stay alive.', score: 0.17353376746177673, title: 'The Martian', type: 'book'}
+9
+: 
+{description: 'A dystopian novel exploring surveillance, authoritarianism and freedom.', score: 0.16986806690692902, title: '1984', type: 'book'}
+10
+: 
+{description: 'Relaxing lo-fi instrumental music perfect for stud…g, or focusing with calm beats and ambient sound.', score: 0.6222313642501831, title: 'Lo-Fi Beats', type: 'music'}
+11
+: 
+{description: 'Relaxing lo-fi hip hop beats perfect for studying and unwinding.', score: 0.535524308681488, title: 'Chillhop Essentials', type: 'music'}
+12
+: 
+{description: 'Atmospheric electronic music inspired by futuristic soundscapes.', score: 0.3769865036010742, title: 'Electronic Dreams', type: 'music'}
+13
+: 
+{description: 'Energetic rock music inspired by legendary bands.', score: 0.3614323139190674, title: 'Rock Legends', type: 'music'}
