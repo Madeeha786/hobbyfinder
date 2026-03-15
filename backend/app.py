@@ -73,7 +73,6 @@ def get_genre_id(genre_name):
 def get_top_rated_books(genres, limit=5):
     all_books = []
     
-    print(f"Fetching batches from Google Books for: {', '.join(genres)}...")
     for genre in genres:
         result_set = client.get_books_by_subject(genre)
         # Extend our master list with the fetched Book objects
@@ -94,8 +93,6 @@ def get_top_rated_books(genres, limit=5):
 
 def get_music_list(interests, total_limit=5):
     tracks_by_interest = []
-    
-    print(f"Fetching bulletproof tracks for: {', '.join(interests)}...")
     
     # Fetch and sort by popularity
     for interest in interests:
@@ -202,56 +199,6 @@ def recommend():
             "score": 1.0,
             "description": description
         })
-
-
-    # Run a dedicated AI search for EACH category the user selected
-    '''
-    for category_key, db_type in category_map.items():
-        cat_interests = interests_data.get(category_key, [])
-        
-        # If the user didn't pick any genres for this category, skip it
-        if not cat_interests:
-            continue
-
-        # 1. Filter catalog down to only this specific type
-        cat_items = [c for c in catalog if c["type"] == db_type]
-        if not cat_items:
-            continue
-
-        # 2. Encode user's interests specifically for this type
-        user_text = " ".join(cat_interests)
-        user_embedding = model.encode([user_text])
-        
-        # 3. Encode catalog descriptions for this type
-        cat_descriptions = [c["description"] for c in cat_items]
-        cat_embeddings = model.encode(cat_descriptions)
-
-        #print("Debug info:")
-        #print(cat_interests)
-        #print([user_text])
-        #print([c["description"] for c in cat_items])
-
-        # 4. Calculate similarities
-        similarities = cosine_similarity(user_embedding, cat_embeddings)[0]
-
-        ranked = sorted(
-            zip(cat_items, similarities),
-            key=lambda x: x[1],
-            reverse=True
-        )
-
-        # 5. Append the top 5 matches for THIS specific category
-        for item, score in ranked[:5]:
-            results.append({
-                "title": item["title"],
-                "type": item["type"],
-                "score": float(score),
-                "description": item["description"]
-            })
-    '''
-
-    #del results[10:]
-    #print(results, flush=True)
 
     return jsonify({
         "recommendations": results

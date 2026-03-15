@@ -147,3 +147,7 @@ The kinda 'recommendations' response to be received/mimicked in dashboard.html
 13
 : 
 {description: 'Energetic rock music inspired by legendary bands.', score: 0.3614323139190674, title: 'Rock Legends', type: 'music'}
+
+
+some random backup
+<button class="btn-save-pick" onclick="savePick('${item.title.replace(/'/g, "\\'")}', this)">⭐ Save Pick</button>

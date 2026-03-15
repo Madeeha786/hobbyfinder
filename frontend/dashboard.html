@@ -107,12 +107,27 @@
 
                     const details = item.description || `A fantastic ${item.type} perfectly matching your personalized profile.`;
 
+                    function escapeHTML(str) {
+                        if (!str) return "No description available.";
+                        return str
+                            .replace(/"/g, '&quot;')  // Replaces double quotes
+                            .replace(/'/g, '&#39;');  // Replaces single quotes
+                    }
+
                     // We wrap the item.title in quotes for the savePick function argument
                     card.innerHTML = `
                         <span class="card-badge">${icon} ${typeDisplay}</span>
                         <h3>${item.title}</h3>
                         <p>${details}</p>
-                        <button class="btn-save-pick" onclick="savePick('${item.title.replace(/'/g, "\\'")}', this)">⭐ Save Pick</button>
+                        <button 
+                            class="btn-save-pick" 
+                            data-title="${escapeHTML(item.title)}" 
+                            data-type="${item.type}"
+                            data-description="${escapeHTML(details)}"
+                            onclick="savePick(this)"
+                        >
+                            ⭐ Save Pick
+                        </button>
                     `;
                     
                     if (targetGrid) targetGrid.appendChild(card);
@@ -131,6 +146,51 @@
         });
 
         // --- NEW: Function to handle saving a pick to PostgreSQL ---
+        // 1. Only accept the button element!
+        async function savePick(buttonElement) {
+            // 2. Extract the data safely from the HTML data attributes
+            const title = buttonElement.getAttribute('data-title');
+            const type = buttonElement.getAttribute('data-type') || 'unknown';
+            const description = buttonElement.getAttribute('data-description') || '';
+
+            const userId = localStorage.getItem('user_id') || localStorage.getItem('_id') || 'temp-user-id';
+            
+            // UI Feedback: Change button state while processing
+            buttonElement.innerText = 'Saving...';
+            buttonElement.disabled = true;
+
+            try {
+                const response = await fetch('http://localhost:5000/api/catalog/save', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        user_id: userId,
+                        title: title,
+                        type: type,               // Sending this to match your PSQL table!
+                        description: description  // Sending this to match your PSQL table!
+                    })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.message || data.error || 'Failed to save');
+                }
+
+                // UI Feedback: Success
+                buttonElement.innerText = '⭐ Saved!';
+                buttonElement.style.background = 'var(--sage-green)';
+                buttonElement.style.color = 'white';
+
+            } catch (err) {
+                console.error(err);
+                alert(`Could not save: ${err.message}`);
+                // Revert button if it failed (e.g. if it was a duplicate)
+                buttonElement.innerText = '⭐ Save Pick';
+                buttonElement.disabled = false;
+            }
+        }
+        /*
         async function savePick(title, buttonElement) {
             const userId = localStorage.getItem('user_id') || localStorage.getItem('_id') || 'temp-user-id';
             
@@ -167,6 +227,7 @@
                 buttonElement.disabled = false;
             }
         }
+        */
 
         function logout() {
             localStorage.clear();
